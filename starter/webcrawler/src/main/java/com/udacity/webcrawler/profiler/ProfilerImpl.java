@@ -34,12 +34,15 @@ final class ProfilerImpl implements Profiler {
   public <T> T wrap(Class<T> klass, T delegate) {
     Objects.requireNonNull(klass);
 
-    Annotation annotation = null;
+    boolean isProfiled = false;
     for (Method method : klass.getMethods()) {
-      annotation = method.getAnnotation(Profiled.class);
+      if (method.isAnnotationPresent(Profiled.class)) {
+        isProfiled = true;
+        break;
+      }
     }
 
-    if (annotation == null) {
+    if (!isProfiled) {
       throw new IllegalArgumentException();
     }
 
