@@ -3,6 +3,8 @@ package com.udacity.webcrawler.profiler;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Proxy;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.ZonedDateTime;
@@ -32,14 +34,23 @@ final class ProfilerImpl implements Profiler {
     // TODO: Use a dynamic proxy (java.lang.reflect.Proxy) to "wrap" the delegate in a
     //       ProfilingMethodInterceptor and return a dynamic proxy from this method.
     //       See https://docs.oracle.com/javase/10/docs/api/java/lang/reflect/Proxy.html.
+    Object proxy  = Proxy.newProxyInstance(
+            ProfilerImpl.class.getClassLoader(),
+            new Class<?>[]{klass},
+            new ProfilingMethodInterceptor(clock, state)
+    );
 
-    return delegate;
+    return (T) proxy;
   }
 
   @Override
-  public void writeData(Path path) {
+  public void writeData(Path path) throws IOException {
     // TODO: Write the ProfilingState data to the given file path. If a file already exists at that
     //       path, the new data should be appended to the existing file.
+    try (Writer writer = Files.newBufferedWriter(path)) {
+      writer.append(System.lineSeparator());
+      state.write(writer);
+    }
   }
 
   @Override
