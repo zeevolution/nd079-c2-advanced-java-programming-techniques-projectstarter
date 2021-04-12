@@ -3,7 +3,6 @@ package com.udacity.webcrawler;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 /**
