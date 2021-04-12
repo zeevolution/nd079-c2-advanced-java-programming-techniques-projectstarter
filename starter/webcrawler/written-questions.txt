@@ -11,6 +11,9 @@ Q1. Run the web crawler using the configurations located at src/main/config/writ
 
     Why did the parser take more time when run with ParallelWebCrawler?
 
+    Answer: The parser took more time because the ParallelWebCrawler was able to visit more URLs than the sequential approach.
+    That way, it downloads more pages which took more time to run.
+
 
 Q2. Your manager ran your crawler on her old personal computer, using the configurations from Q1, and she notices that
     the sequential crawler actually outperforms the parallel crawler. She would like to know why.
@@ -18,16 +21,30 @@ Q2. Your manager ran your crawler on her old personal computer, using the config
     (a) Suggest one reason why the sequential web crawler was able to read more web pages than the parallel crawler.
         (Hint: Try setting "parallelism" to 1 in the JSON configs to simulate your manager's computer.)
 
+        Answer: One possible reason is that the manager`s computer does not run on a multi-thread CPU. Although the JVM
+        virtually creates the threads, the machine needs to support them at hardware and operating system levels.
+        Otherwise, the program will not be able to achieve parallelism.
+
     (b) Suggest one scenario in which the parallel web crawler will almost certainly perform better than the sequential
         crawler. Why will it perform better?
+
+        -> The parallel web crawler will perform better in those scenarios which the starting web page
+        leads to at least one subsequent link, and the maximum search depth is grater than 0.
+        In those scenarios, we can leverage from parallelism by processing multiple web pages in parallel.
 
 
 Q3. Analyze your method profiler through the lens of Aspect Oriented Programming, by answering the following questions:
 
     (a) What cross-cutting concern is being addressed by the com.udacity.webcrawler.profiler.Profiler class?
 
+    -> The cross-cutting concern is performance profiling.
+
     (b) What are the join points of the Profiler in the web crawler program?
 
+    -> The join points of the Profiler are potentially any method that holds a @Profiled annotation.
+    For this web crawler program, the join points could be any instance method invocation of WebCrawler
+    and PageParser classes. Currently, the crawl(List<String>) and parser() methods are the ones being intercepted
+    by the ProfilingMethodInterceptor through the @Profiled.
 
 Q4. Identify three (3) different design patterns used in this project, and explain which interfaces, classes, and/or
     libraries use or implement those design patterns.
@@ -35,4 +52,22 @@ Q4. Identify three (3) different design patterns used in this project, and expla
     For each pattern, name one thing about the pattern that you LIKED, and one thing you DISLIKED. If you did not like
     anything, you can name two things you disliked.
 
+    -> BUILDER pattern: mutable factory for constructing objects. It has been used across many classes in this
+    web crawler program such as CountWordsTask, PageParser, CrawlerConfiguration, CrawlResult, and ParserModule.
+    One thing that I LIKE about this pattern is that it can reduce coding for constructing complex and multi-parameter objects.
+    It also allows much flexibility on constructing objects in many forms by applying method chaining.
+    One thing that I DISLIKE is that it has added extra code in the class files.
 
+    -> ABSTRACT FACTORY pattern: creates objects by hiding construction details from callers. It is used by
+    the PageParserFactoryImpl class for creating PageParser objects.
+    One thing that I LIKE about the pattern is that is can hide complexities of the object creation. For example,
+    The PageParserFactoryImpl hides the performance profiling settings when a caller requests a new PageParser object.
+    There is no particular thing I DISLIKE, but in case we got multiple implementations for the same interface, we need to
+    carefully manage that, so the getter method returns the expected implementation.
+
+    -> DEPENDENCY INJECTION pattern: moves the creation of dependencies to outside of the code. It is widely used by many
+    of this web crawler program such as WebCrawlerMain, ParallelWebCrawler and SequentialWebCrawler classes.
+    One thing that I LIKE about the pattern is that it can create external dependency objects independently from our main
+    code base. The DI framework can inject all external dependencies, so our implementation does not need to worry about them.
+    here is no particular thing I DISLIKE, but it is important to read and understand well the DI framework being used, so
+    they can be leveraged at most and appropriately.

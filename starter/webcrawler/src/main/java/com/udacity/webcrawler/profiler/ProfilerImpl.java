@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.ZonedDateTime;
