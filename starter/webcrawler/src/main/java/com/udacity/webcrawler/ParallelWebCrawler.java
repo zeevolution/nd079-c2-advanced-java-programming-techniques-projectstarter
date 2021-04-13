@@ -53,6 +53,10 @@ final class ParallelWebCrawler implements WebCrawler {
     final Instant deadline = clock.instant().plus(timeout);
 
     for (final String url : startingUrls) {
+      if (clock.instant().isAfter(deadline)) {
+        break;
+      }
+
       final CountWordsTask countWordsTask = new CountWordsTask.Builder()
               .setMaxDepth(maxDepth)
               .setClock(clock)
