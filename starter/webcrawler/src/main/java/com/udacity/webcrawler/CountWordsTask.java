@@ -7,7 +7,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.RecursiveAction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,12 +19,12 @@ public class CountWordsTask extends RecursiveAction {
     private final String url;
     private final PageParserFactory parserFactory;
     private final Map<String, Integer> counts;
-    private final Set<String> visitedUrls;
+    private final ConcurrentSkipListSet<String> visitedUrls;
     private final List<Pattern> ignoredUrls;
 
     public CountWordsTask(final int maxDepth, final Clock clock, final Instant deadline,
                           final String url, final PageParserFactory parserFactory,
-                          final Map<String, Integer> counts, final Set<String> visitedUrls,
+                          final Map<String, Integer> counts, final ConcurrentSkipListSet<String> visitedUrls,
                           final List<Pattern> ignoredUrls) {
         this.maxDepth = maxDepth;
         this.clock = clock;
@@ -48,11 +48,9 @@ public class CountWordsTask extends RecursiveAction {
             }
         }
 
-        if (visitedUrls.contains(url)) {
+        if (!visitedUrls.add(url)) {
             return;
         }
-
-        visitedUrls.add(url);
 
         final PageParser.Result result = parserFactory.get(url).parse();
         countWordsInUrl(result, counts);
@@ -87,7 +85,7 @@ public class CountWordsTask extends RecursiveAction {
         private String url;
         private PageParserFactory parserFactory;
         private Map<String, Integer> counts;
-        private Set<String> visitedUrls;
+        private ConcurrentSkipListSet<String> visitedUrls;
         private List<Pattern> ignoredUrls;
 
         public Builder setMaxDepth(final int maxDepth) {
@@ -120,7 +118,7 @@ public class CountWordsTask extends RecursiveAction {
             return this;
         }
 
-        public Builder setVisitedUrls(final Set<String> visitedUrls) {
+        public Builder setVisitedUrls(final ConcurrentSkipListSet<String> visitedUrls) {
             this.visitedUrls = visitedUrls;
             return this;
         }
